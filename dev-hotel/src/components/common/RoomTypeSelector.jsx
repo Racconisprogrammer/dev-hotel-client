@@ -10,7 +10,7 @@ const RoomTypeSelector = ({handleRoomInputChange, newRoom}) => {
     getRoomTypes().then((data)=>{
       setRoomTypes(data)
     })
-  })
+  }, [])
 
   const handleNewRoomTypeInputChange = (e) =>  {
     setNewRoomType(e.target.value);

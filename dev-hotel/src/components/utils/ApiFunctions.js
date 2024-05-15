@@ -11,11 +11,7 @@ export async function addRoom(photo, roomType, roomPrice) {
     formData.append("roomPrice", roomPrice)
 
     const response = await api.post("/rooms/add/new-room", formData)
-    if (response.status === 201) {
-        return true;
-    } else {
-        return false;
-    }
+    return response.status === 201;
 }
 
 export async function getRoomTypes() {
@@ -24,5 +20,14 @@ export async function getRoomTypes() {
         return response.data
     } catch (error) {
         throw new Error("Error fetching room types")
+    }
+}
+
+export async function getAllRooms() {
+    try {
+        const result = await api.get("/rooms/all-rooms")
+        return result.data
+    } catch (error) {
+        throw new Error("Error fetching rooms")
     }
 }
