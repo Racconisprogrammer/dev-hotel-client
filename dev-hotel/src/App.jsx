@@ -11,7 +11,7 @@ function App() {
 
   return (
     <>
-      {/*<AddRoom />*/}
+      <AddRoom />
       <ExistingRooms />
     </>
   )

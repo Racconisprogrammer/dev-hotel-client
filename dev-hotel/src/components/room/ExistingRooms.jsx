@@ -1,8 +1,11 @@
 import React, {useEffect, useState} from "react";
-import {getAllRooms} from "../utils/ApiFunctions.js";
+import {deleteRoom, getAllRooms} from "../utils/ApiFunctions.js";
 import { Col, Row } from "react-bootstrap"
 import RoomFilter from "../common/RoomFilter.jsx";
 import RoomPaginator from "../common/RoomPaginator.jsx";
+import {FaEdit, FaTrashAlt} from "react-icons/fa"
+import {Link} from "react-router-dom";
+import {FaEye} from "react-icons/fa6";
 
 
 
@@ -17,8 +20,8 @@ const ExistingRooms = () => {
   const [errorMessage, setErrorMessage] = useState("")
 
   useEffect(() => {
+    console.log("use effect1")
     fetchRooms()
-    console.log("useEffect 1")
   }, []);
 
   const fetchRooms = async () => {
@@ -26,7 +29,6 @@ const ExistingRooms = () => {
     try {
       const result = await getAllRooms();
       setRooms(result)
-      console.log("--------------", result)
       setIsLoading(false)
     } catch (error) {
       setErrorMessage(error.message)
@@ -34,7 +36,6 @@ const ExistingRooms = () => {
   }
 
   useEffect(() => {
-    console.log("useEffect 2")
     if (selectedRoomType === "") {
       setFilteredRooms(rooms)
     } else {
@@ -48,18 +49,36 @@ const ExistingRooms = () => {
     setCurrentPage(pageNumber)
   }
 
+  const handleDelete = async (roomId) => {
+    try {
+      const result = await deleteRoom(roomId)
+      if (result === "") {
+        setSuccessMessage(`Room no ${roomId} was delete`)
+        fetchRooms()
+      } else {
+        console.error(`Error deleting room : ${result.message}`)
+      }
+    } catch (error) {
+      setErrorMessage(error.message)
+    }
+    setTimeout(() => {
+      setSuccessMessage("")
+      setErrorMessage("")
+    }, 3000)
+  }
+
   const calculateTotalPages = (filteredRooms, roomsPerPage, rooms) => {
-    console.log("calculate ")
-    const totalRooms = filteredRooms.length > 0 ? filteredRooms.length : rooms.length
-    return Math.ceil(totalRooms / roomsPerPage)
+    console.log("calc ", filteredRooms)
+      const totalRooms = filteredRooms.length > 0 ? filteredRooms.length : rooms.length
+      return Math.ceil(totalRooms / roomsPerPage)
+
+
   }
 
   const indexOfLastRoom = currentPage * roomsPerPage
   const indexOfFirstRoom = indexOfLastRoom - roomsPerPage
-  const currentRooms = (filteredRooms && filteredRooms > 0)
-    ? filteredRooms.slice(indexOfFirstRoom, indexOfLastRoom)
-    : [];
-  // const currentRooms = 10
+  const currentRooms = filteredRooms.slice(indexOfFirstRoom, indexOfLastRoom)
+
   return (
     <>
       {isLoading ? (
@@ -71,7 +90,7 @@ const ExistingRooms = () => {
             <h2>Existing Rooms</h2>
           </div>
           <Col md={6} className='mb-3 mb-md-0'>
-            <RoomFilter data={rooms} setFilteredData={setFilteredRooms()}/>
+            <RoomFilter data={rooms} setFilteredData={setFilteredRooms}/>
           </Col>
 
           <table className="table table-bordered table-hover">
@@ -89,9 +108,21 @@ const ExistingRooms = () => {
                 <td>{room.id}</td>
                 <td>{room.roomType}</td>
                 <td>{room.roomPrice}</td>
-                <td>
-                  <button>View / Edit</button>
-                  <button>Delete</button>
+                <td className="gap-2">
+                  <Link to={`/edit-room/${room.id}`}>
+                    <span className="btn btn-info btn-sm">
+                      <FaEye />
+                    </span>
+                    <span className="btn btn-warning btn-sm">
+                      <FaEdit />
+                    </span>
+                  </Link>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDelete(room.id)}
+                  >
+                    <FaTrashAlt/>
+                  </button>
                 </td>
               </tr>
             ))}
